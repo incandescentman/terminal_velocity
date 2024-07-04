@@ -1,18 +1,23 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """A fast note-taking app for the UNIX terminal"""
 
 import argparse
-import ConfigParser
+import configparser
 import os
 import logging
 import logging.handlers
 import sys
 
-import terminal_velocity.urwid_ui as urwid_ui
+
+
+# Add the parent directory of 'terminal_velocity' to the Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from terminal_velocity import urwid_ui
 
 
 def main():
-
     # Parse the command-line option for the config file.
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-c", "--config", dest="config", action="store",
@@ -22,9 +27,9 @@ def main():
 
     # Parse the config file.
     config_file = os.path.abspath(os.path.expanduser(args.config))
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.read(config_file)
-    defaults = dict(config.items('DEFAULT'))
+    defaults = dict(config.items('DEFAULT')) if 'DEFAULT' in config else {}
 
     # Parse the rest of the command-line options.
     description = __doc__
@@ -85,18 +90,11 @@ the default default will be used"""
 
     args = parser.parse_args()
 
-    extensions = []
-    for extension in args.extensions.split(","):
-        extensions.append(extension.strip())
-    args.extensions = extensions
-
-    exclude = []
-    for name in args.exclude.split(","):
-        exclude.append(name.strip())
-    args.exclude = exclude
+    args.extensions = [extension.strip() for extension in args.extensions.split(",")]
+    args.exclude = [name.strip() for name in args.exclude.split(",")]
 
     if args.print_config:
-        print args
+        print(args)
         sys.exit()
 
     logger = logging.getLogger("terminal_velocity")
@@ -106,10 +104,7 @@ the default default will be used"""
                 os.path.abspath(os.path.expanduser(args.log_file)),
                 maxBytes=1000000,  # 1 megabyte.
                 backupCount=0)
-    if args.debug:
-        fh.setLevel(logging.DEBUG)
-    else:
-        fh.setLevel(logging.WARNING)
+    fh.setLevel(logging.DEBUG if args.debug else logging.WARNING)
     logger.addHandler(fh)
     sh = logging.StreamHandler(sys.stdout)
     sh.setLevel(logging.CRITICAL)

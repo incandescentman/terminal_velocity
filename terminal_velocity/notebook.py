@@ -60,12 +60,16 @@ import sys
 import chardet
 
 
+
 def unicode_or_bust(raw_text):
     """Return the given raw text data decoded to unicode.
 
     If the text cannot be decoded, return None.
 
     """
+    if isinstance(raw_text, str):
+        return raw_text
+
     encodings = ["utf-8"]
     for encoding in (sys.getfilesystemencoding(), sys.getdefaultencoding()):
         # I would use a set for this, but they don't maintain order.
@@ -75,7 +79,7 @@ def unicode_or_bust(raw_text):
     for encoding in encodings:
         if encoding:  # getfilesystemencoding() may return None
             try:
-                decoded = unicode(raw_text, encoding=encoding)
+                decoded = raw_text.decode(encoding)
                 return decoded
             except UnicodeDecodeError:
                 pass
@@ -84,7 +88,7 @@ def unicode_or_bust(raw_text):
     encoding = chardet.detect(raw_text)["encoding"]
     if encoding and encoding not in encodings:
         try:
-            decoded = unicode(raw_text, encoding=encoding)
+            decoded = raw_text.decode(encoding)
             logger.debug("File decoded with chardet, encoding was {0}".format(
                 encoding))
             return decoded
@@ -95,7 +99,7 @@ def unicode_or_bust(raw_text):
 
     # I've heard that decoding with cp1252 never fails, so try that last.
     try:
-        decoded = unicode(raw_text, encoding="cp1252")
+        decoded = raw_text.decode("cp1252")
         logger.debug("File decoded with encoding cp1252")
         return decoded
     except UnicodeDecodeError:
@@ -103,6 +107,8 @@ def unicode_or_bust(raw_text):
 
     # If nothing worked then give up.
     return None
+
+
 
 
 class Error(Exception):
@@ -155,6 +161,8 @@ class DelNoteError(Error):
 
     def __str__(self):
         return repr(self.value)
+
+
 
 
 class PlainTextNote(object):
@@ -215,15 +223,21 @@ class PlainTextNote(object):
     def extension(self):
         return self._extension
 
+
+
     @property
     def contents(self):
-        contents = unicode_or_bust(open(self.abspath, "r").read())
+        with open(self.abspath, "r", encoding="utf-8") as f:
+            contents = f.read()
+        if not isinstance(contents, str):
+            contents = unicode_or_bust(contents)
         if contents is None:
             logger.error(
                 u"Could not decode file contents: {0}".format(self.abspath))
-            return u""
+            return ""
         else:
             return contents
+
 
     @property
     def mtime(self):

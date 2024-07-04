@@ -11,8 +11,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 import urwid
-import notebook
 
+from . import notebook
 
 palette = [
     ("placeholder", "dark blue", "default"),
@@ -23,6 +23,9 @@ palette = [
     ]
 
 
+import subprocess
+import shlex
+
 def system(cmd, loop):
     """Execute a system command in a subshell and return the exit status."""
 
@@ -30,18 +33,22 @@ def system(cmd, loop):
 
     cmd = u"{0}".format(cmd)
     cmd = cmd.encode(sys.getfilesystemencoding())  # FIXME: Correct encoding?
-    safe_cmd = shlex.split(cmd)
-
-    logger.debug("System command: {0}".format(safe_cmd))
 
     try:
-        returncode = subprocess.check_call(safe_cmd)
+        if isinstance(cmd, bytes):
+            cmd = cmd.decode('utf-8')
+
+        # Use shell=True to handle complex commands (like pipes)
+        returncode = subprocess.call(cmd, shell=True)
     except Exception as e:
         logger.exception(e)
         raise e
+    finally:
+        loop.screen.start()
 
-    loop.screen.start()
     return returncode
+
+
 
 
 def placeholder_text(text):
