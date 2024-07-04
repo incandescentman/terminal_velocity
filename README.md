@@ -25,29 +25,29 @@ heavily inspired by the OS X app [Notational Velocity](http://notational.net/). 
 ### Pip - python package manager
 To install Terminal Velocity, run:
 
-  pip install terminal_velocity
+    pip install terminal_velocity
 
 Then to launch it just run:
 
-  terminal_velocity
+    terminal_velocity
 
 To use a different notes directory, run:
 
-  terminal_velocity path/to/your/notes/dir
+    terminal_velocity path/to/your/notes/dir
 
 To see all the command-line options, run:
 
-  terminal_velocity -h
+    terminal_velocity -h
 
 To quit the app, press `ctrl-c` or `ctrl-x`.
 
 To upgrade Terminal Velocity to the latest version, run:
 
-  pip install --upgrade terminal_velocity
+    pip install --upgrade terminal_velocity
 
 To uninstall it, run:
 
-  pip uninstall terminal_velocity
+    pip uninstall terminal_velocity
 
 ### From Source
 
@@ -59,13 +59,13 @@ apt install python3-setuptools python3-chardet python3-urwid python3-dev
 
 Clone the repository from:
 
-  git@github.com:yourusername/terminal_velocity.git
-  or
-  https://github.com/yourusername/terminal_velocity.git
+    git@github.com:yourusername/terminal_velocity.git
+    or
+    https://github.com/yourusername/terminal_velocity.git
 
 Move into the terminal_velocity directory you just cloned and run the following:
 
-  sudo python3 setup.py install
+    sudo python3 setup.py install
 
 ## Releasing to PyPi
 
@@ -73,12 +73,12 @@ To release a new version of Terminal Velocity:
 
 1. Make sure you have set up your \~/.pypirc file for PyPi uploading.
 2. Increment the version number in the [setup.py file](setup.py), add
-  an entry to the [changelog](CHANGELOG.txt), commit both changes to
-  git, and push them to GitHub. For example, see
-  [aae87b](https://github.com/seanh/terminal_velocity/commit/aae87bcc50f88037b8fc76c78c0da2086c5e89ae).
+    an entry to the [changelog](CHANGELOG.txt), commit both changes to
+    git, and push them to GitHub. For example, see
+    [aae87b](https://github.com/seanh/terminal_velocity/commit/aae87bcc50f88037b8fc76c78c0da2086c5e89ae).
 3. Upload the new release to [the terminal\_velocity package on
-  PyPi](https://pypi.python.org/pypi/terminal_velocity): run
-  `python3 setup.py sdist upload -r pypi`.
+    PyPi](https://pypi.python.org/pypi/terminal_velocity): run
+    `python3 setup.py sdist upload -r pypi`.
 
 For more information, see <https://packaging.python.org/>.
 
