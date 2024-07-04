@@ -6,13 +6,11 @@ Implemented using the console user interface library urwid.
 import sys
 import subprocess
 import shlex
-import pipes
 import logging
-logger = logging.getLogger(__name__)
-
 import urwid
-
 from . import notebook
+
+logger = logging.getLogger(__name__)
 
 palette = [
     ("placeholder", "dark blue", "default"),
@@ -20,18 +18,15 @@ palette = [
     ("notewidget focused", "black", "brown"),
     ("search", "default", "default"),
     ("autocomplete", "black", "brown"),
-    ]
+]
 
-
-import subprocess
-import shlex
 
 def system(cmd, loop):
     """Execute a system command in a subshell and return the exit status."""
 
     loop.screen.stop()
 
-    cmd = u"{0}".format(cmd)
+    cmd = f"{cmd}"
     cmd = cmd.encode(sys.getfilesystemencoding())  # FIXME: Correct encoding?
 
     try:
@@ -49,8 +44,6 @@ def system(cmd, loop):
     return returncode
 
 
-
-
 def placeholder_text(text):
     """Return a placeholder text widget with the given text."""
 
@@ -59,12 +52,11 @@ def placeholder_text(text):
     return filler_widget
 
 
-# TODO: This widget will have to get smarter to implement note renaming.
 class NoteWidget(urwid.Text):
 
     def __init__(self, note):
         self.note = note
-        return super(NoteWidget, self).__init__(note.title)
+        super().__init__(note.title)
 
     def selectable(self):
         return True
@@ -72,12 +64,6 @@ class NoteWidget(urwid.Text):
     def keypress(self, size, key):
         return key
 
-    # FIXME: Is this the best way to do this?
-    # The point is that I want the "notewidget focused" and
-    # "notewidget unfocused" display attributes to apply to notewidgets, but
-    # I want to be able to just use NoteWidget objects directly and not have
-    # to wrap them in AttrMap objects, because I want to be able to use
-    # notewidget.note and not have to do notewidget.base_widget.note.
     def render(self, size, focus=False):
         """Render the widget applying focused and unfocused display attrs."""
 
@@ -85,7 +71,7 @@ class NoteWidget(urwid.Text):
             attr_map = {None: "notewidget focused"}
         else:
             attr_map = {None: "notewidget unfocused"}
-        canv = super(NoteWidget, self).render(size, focus=focus)
+        canv = super().render(size, focus=focus)
         canv = urwid.CompositeCanvas(canv)
         canv.fill_attr_apply(attr_map)
         return canv
@@ -104,31 +90,31 @@ class AutocompleteWidget(urwid.Edit):
     def __init__(self, *args, **kwargs):
         self.fake_focus = True
         self._autocomplete_text = None
-        return super(AutocompleteWidget, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def get_autocomplete_text(self):
+    @property
+    def autocomplete_text(self):
         return self._autocomplete_text
 
-    def set_autocomplete_text(self, text):
+    @autocomplete_text.setter
+    def autocomplete_text(self, text):
         self._autocomplete_text = text
         self._invalidate()
 
-    autocomplete_text = property(get_autocomplete_text, set_autocomplete_text)
-
     def render(self, size, focus=False):
-        return super(AutocompleteWidget, self).render(size, self.fake_focus)
+        return super().render(size, self.fake_focus)
 
     def get_text(self):
 
         # When search bar is empty show placeholder text.
         if not self.edit_text and not self.autocomplete_text:
-            placeholder_text = u"Find or Create"
+            placeholder_text = "Find or Create"
             return (placeholder_text,
                     [("placeholder", len(placeholder_text))])
 
         # When no note is focused simply show typed text in search bar.
         if not self.autocomplete_text:
-            return super(AutocompleteWidget, self).get_text()
+            return super().get_text()
 
         # When a note is focused show it's title in the search bar.
         is_substring = self.autocomplete_text.lower().startswith(
@@ -136,7 +122,7 @@ class AutocompleteWidget(urwid.Edit):
         if self.edit_text and is_substring:
             # If the typed text is a substring of the focused note's title,
             # then show the typed text followed by the rest of the focused
-            # note's title in a different colour.
+            # note's title in a different color.
             text_to_show = self.edit_text + self.autocomplete_text[
                     len(self.edit_text):]
             attrs = [("search", len(self.edit_text)),
@@ -165,7 +151,7 @@ class NoteFilterListBox(urwid.ListBox):
     """A filterable list of notes from a notebook."""
 
     def __init__(self, on_changed=None):
-        """Initialise a new NoteFilterListBox.
+        """Initialize a new NoteFilterListBox.
 
         Keyword arguments:
         on_changed -- callable that will be called when the focused note
@@ -175,36 +161,32 @@ class NoteFilterListBox(urwid.ListBox):
         self._fake_focus = False
         self.list_walker = urwid.SimpleFocusListWalker([])
         self.widgets = {}  # NoteWidget cache.
-        super(NoteFilterListBox, self).__init__(self.list_walker)
+        super().__init__(self.list_walker)
         self.on_changed = on_changed
 
-    def get_selected_note(self):
+    @property
+    def selected_note(self):
         return self.focus.note
 
-    selected_note = property(get_selected_note)
-
-    def get_fake_focus(self):
+    @property
+    def fake_focus(self):
         return self._fake_focus
 
-    def set_fake_focus(self, value):
+    @fake_focus.setter
+    def fake_focus(self, value):
         self._fake_focus = value
         self._invalidate()
 
-    fake_focus = property(get_fake_focus, set_fake_focus)
-
     def render(self, size, focus=False):
         if len(self.list_walker) == 0:
-            placeholder = placeholder_text(u"No matching notes, press Enter "
+            placeholder = placeholder_text("No matching notes, press Enter "
                 "to create a new note")
             return placeholder.render(size)
-        return super(NoteFilterListBox, self).render(size, self.fake_focus)
+        return super().render(size, self.fake_focus)
 
     def filter(self, matching_notes):
         """Filter this listbox to show only widgets for matching notes."""
 
-        # Get NoteWidgets for each of the matching Notes, retreive the
-        # NoteWidgets from the NoteWidget cache if possible, if not create new
-        # ones and add them to the cache.
         matching_widgets = []
         for note in matching_notes:
             widget = self.widgets.get(note.abspath)
@@ -215,10 +197,8 @@ class NoteFilterListBox(urwid.ListBox):
                 self.widgets[note.abspath] = widget
                 matching_widgets.append(widget)
 
-        # Remove all widgets from the list walker.
         del self.list_walker[:]
 
-        # Add all the matching widgets to the list walker, in order.
         for widget in matching_widgets:
             self.list_walker.append(widget)
 
@@ -231,12 +211,12 @@ class NoteFilterListBox(urwid.ListBox):
                 break
 
     def keypress(self, size, key):
-        result = super(NoteFilterListBox, self).keypress(size, key)
+        result = super().keypress(size, key)
         self.on_changed(self.selected_note)
         return result
 
     def mouse_event(self, size, event, button, col, row, focus):
-        result = super(NoteFilterListBox, self).mouse_event(
+        result = super().mouse_event(
                 size, event, button, col, row, focus)
         self.on_changed(self.selected_note)
         return result
@@ -251,11 +231,7 @@ class MainFrame(urwid.Frame):
         self.notebook = notebook.PlainTextNoteBook(notes_dir, extension,
                 extensions, exclude=exclude)
 
-        # Don't filter the note list when the text in the search box changes.
         self.suppress_filter = False
-
-        # Don't change the focused note when normally it would change
-        # (e.g. when the text in the search box changes)
         self.suppress_focus = False
 
         self._selected_note = None
@@ -266,18 +242,19 @@ class MainFrame(urwid.Frame):
         urwid.connect_signal(self.search_box, "change",
                 self.on_search_box_changed)
 
-        super(MainFrame, self).__init__(
+        super().__init__(
                 header=urwid.LineBox(self.search_box),
                 body=None,
                 focus_part="body")
 
-        # Add all the notes to the listbox.
         self.filter(self.search_box.edit_text)
 
-    def get_selected_note(self):
+    @property
+    def selected_note(self):
         return self._selected_note
 
-    def set_selected_note(self, note):
+    @selected_note.setter
+    def selected_note(self, note):
         """Select the given note.
 
         Make the note appear focused in the list box, and the note's title
@@ -291,22 +268,17 @@ class MainFrame(urwid.Frame):
 
             self.search_box.autocomplete_text = note.title
 
-            # Focus the list box so the focused note will look selected.
             self.list_box.fake_focus = True
 
-            # Tell list box to focus the note.
             self.list_box.focus_note(note)
 
         else:
 
             self.search_box.autocomplete_text = None
 
-            # Unfocus the listbox so no list item widget will look selected.
             self.list_box.fake_focus = False
 
         self._selected_note = note
-
-    selected_note = property(get_selected_note, set_selected_note)
 
     def quit(self):
         """Quit the app."""
@@ -322,7 +294,6 @@ class MainFrame(urwid.Frame):
 
         if key in ["esc", "ctrl d"]:
             if self.selected_note:
-                # Clear the selected note.
                 self.selected_note = None
                 return None
             elif self.search_box.edit_text:
@@ -331,25 +302,23 @@ class MainFrame(urwid.Frame):
 
         elif key in ["enter"]:
             if self.selected_note:
-                system(self.editor + ' ' + pipes.quote(self.selected_note.abspath), self.loop)
+                system(self.editor + ' ' + shlex.quote(self.selected_note.abspath), self.loop)
             else:
                 if self.search_box.edit_text:
                     try:
                         note = self.notebook.add_new(self.search_box.edit_text)
-                        system(self.editor + ' ' + pipes.quote(note.abspath), self.loop)
+                        system(self.editor + ' ' + shlex.quote(note.abspath), self.loop)
                     except notebook.NoteAlreadyExistsError:
-                        # Try to open the existing note instead.
-                        system(self.editor + ' ' + pipes.quote(self.search_box.edit_text +
+                        system(self.editor + ' ' + shlex.quote(self.search_box.edit_text +
                                 self.notebook.extension),
                             self.loop)
                     except notebook.InvalidNoteTitleError:
-                        # TODO: Display error message to user.
                         pass
                 else:
-                    # Hitting Enter with no note selected and no text typed in
-                    # search box does nothing.
                     pass
             self.suppress_focus = True
+
+
             self.filter(self.search_box.edit_text)
             return None
 
@@ -364,9 +333,6 @@ class MainFrame(urwid.Frame):
 
         elif key in ["down"]:
             if not self.list_box.fake_focus:
-                # If no note is focused make pressing down focus the first
-                # note (not the second, as it would do if we just passed this
-                # keypress straight to the list box).
                 self.list_box.fake_focus = True
                 self.on_list_box_changed(self.list_box.selected_note)
                 return None
@@ -397,38 +363,29 @@ class MainFrame(urwid.Frame):
             return self.search_box.keypress((maxcol,), key)
 
     def filter(self, query):
-        """Do the synchronised list box filter and search box autocomplete.
+        """Do the synchronized list box filter and search box autocomplete."""
 
-        """
         if self.suppress_filter:
             return
 
-        # If the user has no notes yet show some placeholder text, otherwise
-        # show the note list.
         if len(self.notebook) == 0:
-            self.body = placeholder_text(u"You have no notes yet, to create "
+            self.body = placeholder_text("You have no notes yet, to create "
                 "a note type a note title then press Enter")
         else:
             self.body = urwid.Padding(self.list_box, left=1, right=1)
 
-        # Find all notes that match the typed text.
         matching_notes = self.notebook.search(query)
 
-        # Sort the notes.
-        # TODO: Support different sort orderings.
         matching_notes.sort(key=lambda x: x.mtime, reverse=True)
 
-        # Tell the list box to show only the matching notes.
         self.list_box.filter(matching_notes)
 
-        # Find the notes whose title begins with the typed text.
         autocompletable_matches = []
         if query:
             for note in matching_notes:
                 if note.title.lower().startswith(query.lower()):
                     autocompletable_matches.append(note)
 
-        # Select the first autocompletable note.
         if autocompletable_matches:
             self.selected_note = autocompletable_matches[0]
         else:
@@ -450,4 +407,3 @@ def launch(notes_dir, editor, extension, extensions, exclude=None):
     loop = urwid.MainLoop(frame, palette)
     frame.loop = loop
     loop.run()
-
