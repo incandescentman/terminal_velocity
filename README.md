@@ -9,7 +9,7 @@ it is difficult. We hope you understand.
 *If you find a true bug and need help, please reach out via email to Vincent.
 You can find my email in my profile [here](https://github.com/vhp).*
 
-** Forked Version for Python 3
+## Forked Version for Python 3
 
 This fork of Terminal Velocity is an attempt to get it running with Python 3.
 Please note that I am still learning and might need help to get everything fully functional.
@@ -20,9 +20,9 @@ possible, then uses your `$EDITOR` to open and edit the note. It is
 heavily inspired by the OS X app [Notational Velocity](http://notational.net/). For screenshots and features, see the
 [Terminal Velocity website](https://github.com/vhp/terminal_velocity).
 
-** Installation
+## Installation
 
-*** pip - Python package manager
+### Pip - python package manager
 To install Terminal Velocity, run:
 
   pip install terminal_velocity
@@ -49,7 +49,7 @@ To uninstall it, run:
 
   pip uninstall terminal_velocity
 
-*** From Source
+### From Source
 
 Ensure Python modules `urwid`, `setuptools`, and `chardet` are installed. Also, ensure that Python development headers are installed.
 
@@ -67,7 +67,7 @@ Move into the terminal_velocity directory you just cloned and run the following:
 
   sudo python3 setup.py install
 
-** Releasing to PyPi
+## Releasing to PyPi
 
 To release a new version of Terminal Velocity:
 
