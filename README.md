@@ -1,24 +1,14 @@
 # Terminal Velocity
 
-Terminal Velocity is currently in maintenance mode. Python pip installs are
-still supported and the software is stable for day-to-day use with Python 2.
-The software is being moved into maintenance mode because both authors
-no longer use Terminal Velocity. Life happens, and finding the time to maintain
-it is difficult. We hope you understand.
-
-*If you find a true bug and need help, please reach out via email to Vincent.
-You can find my email in my profile [here](https://github.com/vhp).*
-
-## Forked Version for Python 3
-
 This fork of Terminal Velocity is an attempt to get it running with Python 3.
 Please note that I am still learning and might need help to get everything fully functional.
 
-Terminal Velocity is a fast note-taking app for the UNIX terminal, that
-focuses on letting you create or find a note as quickly and easily as
-possible, then uses your `$EDITOR` to open and edit the note. It is
-heavily inspired by the OS X app [Notational Velocity](http://notational.net/). For screenshots and features, see the
-[Terminal Velocity website](https://github.com/vhp/terminal_velocity).
+Terminal Velocity is a fast note-taking app for the UNIX terminal, that focuses on letting you create or find a note as quickly and easily as possible, then uses your `$EDITOR` to open and edit the note. It is heavily inspired by the OS X app [Notational Velocity](http://notational.net/). For screenshots and features, see the [Terminal Velocity website](https://github.com/vhp/terminal_velocity).
+
+The official version of Terminal Velocity is in maintenance mode because the authors no longer use Terminal Velocity.
+
+*If you find a true bug and need help, please reach out via email to Vincent.
+You can find my email in my profile [here](https://github.com/vhp).*
 
 ## Installation
 
